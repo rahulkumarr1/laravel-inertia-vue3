@@ -13,14 +13,18 @@ class BlogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $blogs = Blog::all();
+        $blogs =  Blog::query()->when($request->search, function ($query, $search) {
+            $query->where('title', 'like', '%' . $search . '%');
+                // ->OrWhere('content', 'like', '%' . $search . '%');
+        })->paginate(10)->withQueryString();
 
         return Inertia::render(
             'Blogs/Index',
             [
-                'blogs' => $blogs
+                'blogs' => $blogs,
+                'filters' => ['search'=>$request->search]
             ]
         );
     }
