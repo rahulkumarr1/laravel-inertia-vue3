@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BlogController extends Controller
 {
@@ -14,7 +15,14 @@ class BlogController extends Controller
      */
     public function index()
     {
-        //
+        $blogs = Blog::all();
+
+        return Inertia::render(
+            'Blogs/Index',
+            [
+                'blogs' => $blogs
+            ]
+        );
     }
 
     /**
@@ -24,7 +32,9 @@ class BlogController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render(
+            'Blogs/Create'
+        );
     }
 
     /**
@@ -35,7 +45,19 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'content' => 'required',
+        ]);
+        Blog::create([
+            'title' => $request->title,
+            'slug' => \Str::slug($request->slug),
+            'content' => $request->content
+        ]);
+        sleep(1);
+
+        return redirect()->route('blogs.index')->with('message', 'Blog Created Successfully');
     }
 
     /**
@@ -57,7 +79,12 @@ class BlogController extends Controller
      */
     public function edit(Blog $blog)
     {
-        //
+        return Inertia::render(
+            'Blogs/Edit',
+            [
+                'blog' => $blog
+            ]
+        );
     }
 
     /**
@@ -69,7 +96,19 @@ class BlogController extends Controller
      */
     public function update(Request $request, Blog $blog)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'content' => 'required',
+        ]);
+
+        $blog->title = $request->title;
+        $blog->slug = \Str::slug($request->slug);
+        $blog->content = $request->content;
+        $blog->save();
+        sleep(1);
+
+        return redirect()->route('blogs.index')->with('message', 'Blog Updated Successfully');
     }
 
     /**
@@ -80,6 +119,9 @@ class BlogController extends Controller
      */
     public function destroy(Blog $blog)
     {
-        //
+        $blog->delete();
+        sleep(1);
+
+        return redirect()->route('blogs.index')->with('message', 'Blog Delete Successfully');
     }
 }
